@@ -274,6 +274,8 @@ spec:
             value: {{ .Values.olaresEnv.HF_TOKEN | default "" | quote }}
           - name: HF_HOME
             value: {{ .Values.env.HF_HOME | quote }}
+          - name: CUDA_DEVICE_MEMORY_LIMIT_0
+            value: {{ .Values.env.CUDA_DEVICE_MEMORY_LIMIT_0 | quote }}
           - name: GPU_MEM_UTIL
             value: {{ .Values.env.GPU_MEM_UTIL | quote }}
           - name: MAX_NUM_SEQS
