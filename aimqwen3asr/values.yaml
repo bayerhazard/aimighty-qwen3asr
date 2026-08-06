@@ -1,0 +1,68 @@
+image:
+  repository: qwenllm/qwen3-asr
+  tag: "latest"
+  digest: "sha256:fb75b775f089e06e5a1aaebffd421e37505cc630d50c86d889d95ffa45a7e16a"
+  pullPolicy: IfNotPresent
+nginx:
+  image: nginx:alpine
+replicaCount: 1
+
+workloads:
+  aimqwen3asr:
+    replicaCount: 1
+
+revisionHistoryLimit: 1
+apiPort: 8000
+dashboardPort: 8080
+strategy:
+  type: Recreate
+resources:
+  limits:
+    cpu: "8"
+    memory: 16Gi
+    nvidia.com/gpu: "1"
+  requests:
+    cpu: "2"
+    memory: 8Gi
+nginxResources:
+  limits:
+    cpu: 200m
+    memory: 64Mi
+  requests:
+    cpu: 50m
+    memory: 32Mi
+env:
+  MODEL_NAME: Qwen/Qwen3-ASR-1.7B
+  MODEL_ALIAS: qwen3-asr-1.7b
+  HF_HOME: /models/huggingface
+  GPU_MEM_UTIL: "0.3"
+  MAX_NUM_SEQS: "4"
+
+# Olares-injected environment variables (from OlaresManifest envs:).
+# Default present so standalone `helm template` renders without nil pointer;
+# Olares overrides this at install time.
+olaresEnv:
+  HF_TOKEN: ""
+volumes:
+  dshm:
+    sizeLimit: 2Gi
+startupProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 720
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 600
+  periodSeconds: 30
+  timeoutSeconds: 15
+  failureThreshold: 5
+userspace:
+  appData: /olares/rootfs/userspace/pvc-userspace-aimighty-m27rxxbszvgk1u2l/Data/aimqwen3asr
+service:
+  type: ClusterIP

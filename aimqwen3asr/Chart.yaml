@@ -1,0 +1,21 @@
+apiVersion: v2
+name: aimqwen3asr
+description: AIM Qwen3-ASR 1.7B — Qwen3-ASR-1.7B via vLLM, OpenAI-compatible /v1/audio/transcriptions, 30 languages + 22 Chinese dialects
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ai
+  - asr
+  - speech-to-text
+  - transcription
+  - qwen
+  - qwen3-asr
+  - alibaba
+  - vllm
+home: https://github.com/bayerhazard/aimighty-qwen3asr
+sources:
+  - https://github.com/bayerhazard/aimighty-qwen3asr
+maintainers:
+  - name: Aimighty
+    email: admin@aimighty.local

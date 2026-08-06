@@ -1,0 +1,88 @@
+olaresManifest.version: '0.12.0'
+olaresManifest.type: app
+apiVersion: 'v3'
+
+workloadReplicas:
+  aimqwen3asr: 1
+
+metadata:
+  name: aimqwen3asr
+  icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
+  description: Qwen3-ASR-1.7B via vLLM — OpenAI-compatible /v1/audio/transcriptions, 30 languages + 22 Chinese dialects
+  appid: aimqwen3asr
+  title: AIM Qwen3 ASR 1.7B
+  version: '1.0.0'
+  categories:
+    - Audio
+
+entrances:
+  - name: aimqwen3asr
+    port: 8080
+    host: aimqwen3asr
+    title: Qwen3-ASR Dashboard
+    icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
+    openMethod: window
+    authLevel: internal
+
+spec:
+  versionName: '1.0.0'
+  fullDescription: |
+    **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a full OpenAI-compatible transcription API.
+
+    **Model**
+    Qwen/Qwen3-ASR-1.7B (Apache-2.0, commercial use allowed). SOTA among open-source ASR models, competitive with the strongest commercial APIs. Supports language identification and speech recognition for 30 languages and 22 Chinese dialects (incl. German).
+
+    **Inference Engine**
+    vLLM (official `qwenllm/qwen3-asr` image, CUDA 12.8). Native OpenAI-compatible /v1/audio/transcriptions + /v1/chat/completions (audio_url).
+
+    **Key Features**
+    - OpenAI-compatible API: /v1/audio/transcriptions, /v1/models
+    - Automatic language detection (or force e.g. "German")
+    - Robust under noise, accents and challenging text patterns
+    - Streaming and long-audio transcription supported by the engine
+    - Web dashboard for quick testing (upload audio → transcript)
+
+    **API Example**
+    ```bash
+    curl -X POST http://localhost:8000/v1/audio/transcriptions \
+      -H "Content-Type: multipart/form-data" \
+      -F "file=@audio.wav" -F "model=qwen3-asr-1.7b" -F "language=German"
+    # {"text":"..."}
+    ```
+
+    **Resource Usage**
+    GPU: 1× NVIDIA (~6-8 GB VRAM via GPU memory slice, co-resident with other apps)
+    RAM: 8 GB, CPU: 2 cores
+    Disk: 20 GB (model cache, HF_HOME)
+  upgradeDescription: |
+    v1.0.0: Initial release — Qwen3-ASR-1.7B via official qwenllm/qwen3-asr image (digest-pinned), qwen-asr-serve, OpenAI-compatible transcription API, web dashboard. Designed to co-reside on the worker GPU via a small memory slice.
+  developer: Aimighty
+  website: https://github.com/bayerhazard/aimighty-qwen3asr
+  sourceCode: https://github.com/bayerhazard/aimighty-qwen3asr
+  requiredCpu: "2"
+  limitedCpu: "8"
+  requiredMemory: 8Gi
+  limitedMemory: 16Gi
+  requiredDisk: 20Gi
+  limitedDisk: 50Gi
+  requiredGpu: 1
+  supportArch:
+    - amd64
+
+permission:
+  appData: true
+
+envs:
+  - envName: HF_TOKEN
+    required: false
+    applyOnChange: true
+    valueFrom:
+      envName: OLARES_USER_HUGGINGFACE_TOKEN
+
+options:
+  apiTimeout: 0
+  allowMultipleInstall: false
+  dependencies:
+    - name: olares
+      version: '>=1.12.6-0'
+      type: system

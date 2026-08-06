@@ -1,0 +1,357 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aimqwen3asr-dashboard
+  namespace: {{ .Release.Namespace }}
+data:
+  nginx.conf: |
+    events { worker_connections 64; }
+    http {
+      log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent"';
+      access_log /dev/stdout main;
+      error_log /dev/stderr warn;
+      sendfile on;
+      tcp_nopush on;
+      keepalive_timeout 65;
+      gzip on;
+      gzip_types text/html text/css application/javascript;
+      client_max_body_size 200m;
+
+      upstream asr_api {
+        server 127.0.0.1:{{ .Values.apiPort }};
+      }
+
+      server {
+        listen {{ .Values.dashboardPort }};
+        server_name _;
+
+        location / {
+          root /usr/share/nginx/html;
+          index index.html;
+          try_files $uri $uri/ /index.html;
+        }
+
+        location /v1/ {
+          proxy_pass http://asr_api;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_read_timeout 600s;
+          proxy_send_timeout 600s;
+          proxy_connect_timeout 30s;
+        }
+
+        location /health {
+          proxy_pass http://asr_api;
+          proxy_set_header Host $host;
+        }
+      }
+    }
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Qwen3-ASR</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: #0f0f0f; color: #e0e0e0; min-height: 100vh;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .container { width: 100%; max-width: 720px; padding: 2rem; }
+        h1 {
+          font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;
+          background: linear-gradient(135deg, #64748b, #3b82f6);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .dropzone {
+          width: 100%; padding: 2rem 1rem; border-radius: 12px;
+          border: 1.5px dashed #3a3a3a; background: #141414;
+          text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+          font-size: 0.9rem; color: #aaa;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: #3b82f6; background: #161b26; }
+        .dropzone .filename { color: #e0e0e0; font-weight: 500; }
+        .controls { display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; }
+        select {
+          flex: 1; padding: 0.6rem 0.75rem; border-radius: 8px;
+          border: 1px solid #333; background: #1a1a1a; color: #e0e0e0;
+          font-size: 0.9rem; outline: none; cursor: pointer;
+        }
+        select:focus { border-color: #3b82f6; }
+        button {
+          padding: 0.6rem 1.5rem; border-radius: 8px; border: none;
+          background: linear-gradient(135deg, #64748b, #3b82f6);
+          color: #fff; font-size: 0.9rem; font-weight: 500;
+          cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+        }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status { margin-top: 1rem; font-size: 0.85rem; color: #888; min-height: 1.5rem; }
+        .status.error { color: #ef4444; }
+        .status.success { color: #22c55e; }
+        .transcript {
+          margin-top: 1rem; padding: 1rem; border-radius: 10px;
+          background: #1a1a1a; border: 1px solid #333; min-height: 120px;
+          white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; display: none;
+        }
+        .transcript .label { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .health {
+          margin-top: 2rem; padding: 0.75rem; border-radius: 8px;
+          background: #1a1a1a; border: 1px solid #333; font-size: 0.8rem; color: #888;
+        }
+        .health span { color: #22c55e; }
+        .hint { color: #666; font-size: 0.78rem; margin-top: 0.4rem; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Qwen3-ASR 1.7B</h1>
+        <p class="subtitle">Alibaba Qwen3-ASR via vLLM — 30 languages, automatic detection, robust to noise</p>
+
+        <div class="dropzone" id="dropzone">
+          <div id="dzText">Click or drop an audio file (wav / mp3 / m4a / flac / ogg)</div>
+          <input type="file" id="fileInput" accept="audio/*" hidden>
+        </div>
+
+        <div class="controls">
+          <select id="langSelect">
+            <option value="">Auto-detect</option>
+            <option value="German">Deutsch</option>
+            <option value="English">English</option>
+            <option value="French">Français</option>
+            <option value="Spanish">Español</option>
+            <option value="Italian">Italiano</option>
+            <option value="Dutch">Nederlands</option>
+            <option value="Portuguese">Português</option>
+            <option value="Polish">Polski</option>
+            <option value="Turkish">Türkçe</option>
+            <option value="Russian">Русский</option>
+            <option value="Chinese">中文</option>
+            <option value="Japanese">日本語</option>
+            <option value="Korean">한국어</option>
+          </select>
+          <button id="transcribeBtn" onclick="transcribe()" disabled>Transcribe</button>
+        </div>
+        <div class="hint">Language hint is optional — Qwen3-ASR auto-detects.</div>
+
+        <div class="status" id="status"></div>
+        <div class="transcript" id="transcript">
+          <div class="label">Transcript</div>
+          <div id="transcriptText"></div>
+        </div>
+
+        <div class="health" id="healthInfo">Checking health...</div>
+      </div>
+      <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const statusEl = document.getElementById('status');
+        const transcriptEl = document.getElementById('transcript');
+        const transcriptText = document.getElementById('transcriptText');
+        const btn = document.getElementById('transcribeBtn');
+        let selectedFile = null;
+
+        async function checkHealth() {
+          try {
+            const res = await fetch('/health');
+            await res.json();
+            document.getElementById('healthInfo').innerHTML = 'Status: <span>OK</span>';
+          } catch (e) {
+            document.getElementById('healthInfo').innerHTML = 'Status: <span style="color:#ef4444">UNREACHABLE</span>';
+          }
+        }
+
+        function setFile(file) {
+          if (!file) return;
+          selectedFile = file;
+          document.getElementById('dzText').innerHTML = '<span class="filename">' + file.name + '</span> — ' + (file.size / 1024).toFixed(0) + ' KB';
+          btn.disabled = false;
+        }
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); setFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+
+        async function transcribe() {
+          if (!selectedFile) return;
+          const form = new FormData();
+          form.append('file', selectedFile);
+          form.append('model', 'qwen3-asr-1.7b');
+          const lang = document.getElementById('langSelect').value;
+          if (lang) form.append('language', lang);
+
+          btn.disabled = true;
+          statusEl.className = 'status';
+          statusEl.textContent = 'Transcribing...';
+          transcriptEl.style.display = 'none';
+
+          try {
+            const res = await fetch('/v1/audio/transcriptions', { method: 'POST', body: form });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.detail || err.message || ('HTTP ' + res.status));
+            }
+            const data = await res.json();
+            transcriptText.textContent = data.text || '(empty transcript)';
+            transcriptEl.style.display = 'block';
+            statusEl.className = 'status success';
+            statusEl.textContent = 'Done';
+          } catch (e) {
+            statusEl.className = 'status error';
+            statusEl.textContent = 'Error: ' + e.message;
+          } finally {
+            btn.disabled = false;
+          }
+        }
+
+        checkHealth();
+        setInterval(checkHealth, 30000);
+      </script>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aimqwen3asr-env
+  namespace: {{ .Release.Namespace }}
+data:
+  MODEL_NAME: {{ .Values.env.MODEL_NAME | quote }}
+  MODEL_ALIAS: {{ .Values.env.MODEL_ALIAS | quote }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aimqwen3asr
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: aimqwen3asr
+spec:
+  replicas: {{ .Values.workloads.aimqwen3asr.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: aimqwen3asr
+  strategy:
+    type: {{ .Values.strategy.type }}
+  template:
+    metadata:
+      labels:
+        app: aimqwen3asr
+    spec:
+      containers:
+      # Container 1: Qwen3-ASR vLLM server
+      - name: asr-server
+        image: "{{ .Values.image.repository }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ else }}:{{ .Values.image.tag }}{{ end }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["qwen-asr-serve"]
+        args:
+          - "$(MODEL_NAME)"
+          - "--served-model-name"
+          - "$(MODEL_ALIAS)"
+          - "--host"
+          - "0.0.0.0"
+          - "--port"
+          - "8000"
+          - "--gpu-memory-utilization"
+          - "$(GPU_MEM_UTIL)"
+          - "--max-num-seqs"
+          - "$(MAX_NUM_SEQS)"
+          - "--trust-remote-code"
+        env:
+          - name: HF_TOKEN
+            value: {{ .Values.olaresEnv.HF_TOKEN | default "" | quote }}
+          - name: HF_HOME
+            value: {{ .Values.env.HF_HOME | quote }}
+          - name: GPU_MEM_UTIL
+            value: {{ .Values.env.GPU_MEM_UTIL | quote }}
+          - name: MAX_NUM_SEQS
+            value: {{ .Values.env.MAX_NUM_SEQS | quote }}
+          - name: PYTORCH_CUDA_ALLOC_CONF
+            value: "expandable_segments:True"
+          - name: GPU_TYPE
+            value: "nvidia"
+        envFrom:
+          - configMapRef:
+              name: aimqwen3asr-env
+        ports:
+          - containerPort: {{ .Values.apiPort }}
+            name: api
+        resources:
+            {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+          - name: models
+            mountPath: /models
+          - name: dshm
+            mountPath: /dev/shm
+        startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 10 }}
+        livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 10 }}
+
+      # Container 2: nginx Dashboard
+      - name: nginx
+        image: "{{ .Values.nginx.image }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: {{ .Values.dashboardPort }}
+            name: dashboard
+        resources:
+            {{- toYaml .Values.nginxResources | nindent 10 }}
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: dashboard-html
+            mountPath: /usr/share/nginx/html
+
+      volumes:
+        - name: models
+          hostPath:
+            path: {{ .Values.userspace.appData }}/models
+            type: DirectoryOrCreate
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.volumes.dshm.sizeLimit }}
+        - name: nginx-config
+          configMap:
+            name: aimqwen3asr-dashboard
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+        - name: dashboard-html
+          configMap:
+            name: aimqwen3asr-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aimqwen3asr
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: aimqwen3asr
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: dashboard
+      port: {{ .Values.dashboardPort }}
+      targetPort: {{ .Values.dashboardPort }}
+      protocol: TCP
+    - name: api
+      port: {{ .Values.apiPort }}
+      targetPort: {{ .Values.apiPort }}
+      protocol: TCP
+  selector:
+    app: aimqwen3asr
