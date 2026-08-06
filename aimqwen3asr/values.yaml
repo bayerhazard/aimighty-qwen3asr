@@ -5,6 +5,16 @@ image:
   pullPolicy: IfNotPresent
 nginx:
   image: nginx:alpine
+
+transcribe:
+  image: python:3.12-alpine
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
 replicaCount: 1
 
 workloads:
@@ -14,6 +24,7 @@ workloads:
 revisionHistoryLimit: 1
 apiPort: 8000
 dashboardPort: 8080
+transcribePort: 8010
 strategy:
   type: Recreate
 resources:
@@ -36,7 +47,7 @@ env:
   MODEL_ALIAS: qwen3-asr-1.7b
   HF_HOME: /models/huggingface
   CUDA_DEVICE_MEMORY_LIMIT_0: "8192m"
-  GPU_MEM_UTIL: "0.3"
+  GPU_MEM_UTIL: "0.9"
   MAX_NUM_SEQS: "4"
 
 # Olares-injected environment variables (from OlaresManifest envs:).

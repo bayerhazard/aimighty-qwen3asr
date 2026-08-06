@@ -24,6 +24,10 @@ data:
         server 127.0.0.1:{{ .Values.apiPort }};
       }
 
+      upstream asr_transcribe {
+        server 127.0.0.1:{{ .Values.transcribePort }};
+      }
+
       server {
         listen {{ .Values.dashboardPort }};
         server_name _;
@@ -32,6 +36,18 @@ data:
           root /usr/share/nginx/html;
           index index.html;
           try_files $uri $uri/ /index.html;
+        }
+
+        location /v1/audio/transcriptions {
+          proxy_pass http://asr_transcribe;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_read_timeout 600s;
+          proxy_send_timeout 600s;
+          proxy_connect_timeout 30s;
+          client_max_body_size 200m;
         }
 
         location /v1/ {
@@ -230,6 +246,94 @@ data:
   MODEL_NAME: {{ .Values.env.MODEL_NAME | quote }}
   MODEL_ALIAS: {{ .Values.env.MODEL_ALIAS | quote }}
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aimqwen3asr-transcribe
+  namespace: {{ .Release.Namespace }}
+data:
+  transcribe-parse.py: |
+    #!/usr/bin/env python3
+    # ASR raw-output -> clean text proxy.
+    # Qwen3-ASR emits "language <X><asr_text><transcript>" via the vLLM
+    # /v1/audio/transcriptions endpoint (the qwen_asr parse step is NOT applied
+    # by the plain vLLM route). Strip the metadata so clients get pure text.
+    import json
+    import re
+    import urllib.request
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    BACKEND = "http://127.0.0.1:{{ .Values.apiPort }}"
+
+    def clean_text(raw):
+        if not raw:
+            return ""
+        s = str(raw).strip()
+        s = re.sub(r"<\|[^|]*\|>", "", s)
+        if "<asr_text>" in s:
+            s = s.split("<asr_text>", 1)[1]
+        else:
+            m = re.match(r"^language\s+\S+\s*\n", s)
+            if m:
+                s = s[m.end():]
+        return s.strip()
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path.startswith("/health"):
+                try:
+                    urllib.request.urlopen(BACKEND + "/health", timeout=5)
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(b'{"status":"ok"}')
+                except Exception:
+                    self.send_response(503)
+                    self.end_headers()
+                return
+            self.send_error(404)
+
+        def do_POST(self):
+            if self.path != "/v1/audio/transcriptions":
+                self.send_error(404)
+                return
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            body = self.rfile.read(length)
+            req = urllib.request.Request(
+                BACKEND + "/v1/audio/transcriptions",
+                data=body,
+                headers={"Content-Type": self.headers.get("Content-Type", "application/octet-stream")},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=600) as resp:
+                    resp_data = resp.read()
+            except urllib.error.HTTPError as e:
+                self.send_response(e.code)
+                self.end_headers()
+                self.wfile.write(e.read())
+                return
+            except Exception:
+                self.send_error(502)
+                return
+            try:
+                data = json.loads(resp_data)
+                if isinstance(data, dict) and "text" in data:
+                    data["text"] = clean_text(data["text"])
+                resp_data = json.dumps(data).encode()
+            except Exception:
+                pass
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(resp_data)))
+            self.end_headers()
+            self.wfile.write(resp_data)
+
+        def log_message(self, fmt, *args):
+            pass
+
+    if __name__ == "__main__":
+        HTTPServer(("0.0.0.0", {{ .Values.transcribePort }}), Handler).serve_forever()
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -268,6 +372,8 @@ spec:
           - "$(GPU_MEM_UTIL)"
           - "--max-num-seqs"
           - "$(MAX_NUM_SEQS)"
+          - "--max-model-len"
+          - "20480"
           - "--trust-remote-code"
         env:
           - name: HF_TOKEN
@@ -318,6 +424,25 @@ spec:
           - name: dashboard-html
             mountPath: /usr/share/nginx/html
 
+      # Container 3: ASR raw-output -> clean text proxy
+      # (Qwen3-ASR emits "language <X><asr_text><text>" via the vLLM
+      # transcription route; strip the metadata so clients get pure text)
+      - name: transcribe-parse
+        image: "{{ .Values.transcribe.image }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - "python"
+          - "/opt/transcribe-parse.py"
+        ports:
+          - containerPort: {{ .Values.transcribePort }}
+            name: transcribe
+        resources:
+            {{- toYaml .Values.transcribe.resources | nindent 10 }}
+        volumeMounts:
+          - name: transcribe-script
+            mountPath: /opt/transcribe-parse.py
+            subPath: transcribe-parse.py
+
       volumes:
         - name: models
           hostPath:
@@ -336,6 +461,12 @@ spec:
         - name: dashboard-html
           configMap:
             name: aimqwen3asr-dashboard
+        - name: transcribe-script
+          configMap:
+            name: aimqwen3asr-transcribe
+            items:
+              - key: transcribe-parse.py
+                path: transcribe-parse.py
 ---
 apiVersion: v1
 kind: Service

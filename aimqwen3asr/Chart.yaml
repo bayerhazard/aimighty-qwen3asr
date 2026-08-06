@@ -2,7 +2,7 @@ apiVersion: v2
 name: aimqwen3asr
 description: AIM Qwen3-ASR 1.7B — Qwen3-ASR-1.7B via vLLM, OpenAI-compatible /v1/audio/transcriptions, 30 languages + 22 Chinese dialects
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: "1.0.0"
 keywords:
   - ai

@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR-1.7B via vLLM — OpenAI-compatible /v1/audio/transcriptions, 30 languages + 22 Chinese dialects
   appid: aimqwen3asr
   title: AIM Qwen3 ASR 1.7B
-  version: '1.0.1'
+  version: '1.0.2'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '1.0.1'
+  versionName: '1.0.2'
   fullDescription: |
     **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a full OpenAI-compatible transcription API.
 
@@ -55,6 +55,7 @@ spec:
     RAM: 8 GB, CPU: 2 cores
     Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
+    v1.0.2: KV fit + clean output — gpu_memory_utilization 0.3 -> 0.9 (HAMi reports total=8 GiB; 0.3x8=2.4 GiB budget < 3.86 GiB model -> no KV cache) and --max-model-len 20480 (default 65536 needs 7 GiB KV, only 2.24 GiB available). Added transcribe-parse sidecar: Qwen3-ASR emits 'language X<asr_text>...' via the vLLM transcription route; the proxy strips the metadata so /v1/audio/transcriptions returns pure text.
     v1.0.1: HAMi fix — set CUDA_DEVICE_MEMORY_LIMIT_0=8192m (the GPU binding injected memory=0 on the shared worker GPU, blocking all cudaMalloc; engine crashed at boot). Caps the app at 8 GiB so it co-resides with Voxtral TTS (14 GiB) on the 24 GB worker GPU.
     v1.0.0: Initial release — Qwen3-ASR-1.7B via official qwenllm/qwen3-asr image (digest-pinned), qwen-asr-serve, OpenAI-compatible transcription API, web dashboard.
   developer: Aimighty
