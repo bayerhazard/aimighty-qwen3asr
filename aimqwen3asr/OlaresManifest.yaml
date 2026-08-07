@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR-1.7B via vLLM - OpenAI-kompatibel
   appid: aimqwen3asr
   title: AIM Qwen3 ASR 1.7B
-  version: '1.2.0'
+  version: '1.2.1'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '1.2.0'
+  versionName: '1.2.1'
   fullDescription: |
     Qwen3-ASR-1.7B — State-of-the-art Spracherkennung via vLLM mit vollständig OpenAI-kompatiblen Endpunkt für eine vollständig lokale Voice Pipeline auf Olares One.
 
@@ -42,6 +42,7 @@ spec:
     - /v1/models (Abfrage verfügbarer Modelle)
     - /v1/chat/completions (Chat-Kompletionen mit Audio-URLs als Input)
   upgradeDescription: |
+    1.2.1: Sprachauswahl sendet ISO-Codes (de/en/fr) — Fix für vLLM-Sprachvalidierung
     1.2.0: Dashboard im Rewind-Design mit Direktaufnahme (Mikrofon), Sprachumschalter DE/EN und dezenter Konfig-Anzeige
     1.1.0: Initial Release für Olares One
   developer: Aimighty
