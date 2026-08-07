@@ -8,10 +8,10 @@ workloadReplicas:
 metadata:
   name: aimqwen3asr
   icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
-  description: Qwen3-ASR-1.7B via vLLM - OpenAI-kompatibel
+  description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
-  title: AIM Qwen3 ASR 1.7B
-  version: '1.2.1'
+  title: AIM Qwen3 1.7B ASR
+  version: '26.08.1'
   categories:
     - Audio
 
@@ -19,29 +19,37 @@ entrances:
   - name: aimqwen3asr
     port: 8080
     host: aimqwen3asr
-    title: Qwen3-ASR Dashboard
+    title: AIM Qwen3 1.7B ASR
     icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
     openMethod: window
     authLevel: internal
 
 spec:
-  versionName: '1.2.1'
+  versionName: '26.08.1'
   fullDescription: |
-    Qwen3-ASR-1.7B — State-of-the-art Spracherkennung via vLLM mit vollständig OpenAI-kompatiblen Endpunkt für eine vollständig lokale Voice Pipeline auf Olares One.
+    **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
 
-    Key Features:
-    - ASR (Automatic Speech Recognition) / STT (Speech to Text)
-    - Spracherkennung: Automatische Identifikation der gesprochene Sprache
-    - Sprachunterstützung: 30 Sprachen, inklusive Deutsch und Englisch
-    - Robust bei Nebengeräuschen, Akzenten und schwierigen Textstrukturen
-    - Dashboard für einfaches Testen
-    - Open-Source unter der Apache 2.0 Lizenz
+    **Model**
+    Qwen/Qwen3-ASR-1.7B (Apache-2.0, commercial use allowed). SOTA among open-source ASR models. Language identification + ASR for 30 languages and 22 Chinese dialects.
 
-    Endpunkte:
-    - /v1/audio/transcriptions (Transkription von Audiodateien in Text)
-    - /v1/models (Abfrage verfügbarer Modelle)
-    - /v1/chat/completions (Chat-Kompletionen mit Audio-URLs als Input)
+    **Inference Engine**
+    vLLM (official qwenllm/qwen3-asr image, CUDA 12.8). Native OpenAI-compatible /v1/audio/transcriptions + /v1/chat/completions (audio_url).
+
+    **Key Features**
+    - OpenAI-compatible API: /v1/audio/transcriptions, /v1/models
+    - Automatic language detection (or force e.g. "German")
+    - Robust under noise, accents and challenging text patterns
+    - Web dashboard for quick testing (upload/record audio → transcript)
+
+    **API Example**
+    curl -X POST http://localhost:8000/v1/audio/transcriptions -H "Content-Type: multipart/form-data" -F "file=@audio.wav" -F "model=qwen3-asr-1.7b" -F "language=German"
+
+    **Resource Usage**
+    GPU: 1× NVIDIA (~6-8 GB VRAM via memory slice, co-resident)
+    RAM: 8 GB, CPU: 2 cores
+    Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
+    v26.08.1: Unified naming — title "AIM Qwen3 1.7B ASR", English descriptions. Built for Olares 1.12.6.
     1.2.1: Sprachauswahl sendet ISO-Codes (de/en/fr) — Fix für vLLM-Sprachvalidierung
     1.2.0: Dashboard im Rewind-Design mit Direktaufnahme (Mikrofon), Sprachumschalter DE/EN und dezenter Konfig-Anzeige
     1.1.0: Initial Release für Olares One

@@ -8,10 +8,10 @@ workloadReplicas:
 metadata:
   name: aimqwen3asr
   icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
-  description: Qwen3-ASR-1.7B via vLLM - OpenAI-kompatibel
+  description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
-  title: AIM Qwen3 ASR 1.7B
-  version: '1.2.1'
+  title: AIM Qwen3 1.7B ASR
+  version: '26.08.1'
   categories:
     - Audio
 
@@ -19,13 +19,13 @@ entrances:
   - name: aimqwen3asr
     port: 8080
     host: aimqwen3asr
-    title: Qwen3-ASR Dashboard
+    title: AIM Qwen3 1.7B ASR
     icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
     openMethod: window
     authLevel: internal
 
 spec:
-  versionName: '1.2.1'
+  versionName: '26.08.1'
   fullDescription: |
     Qwen3-ASR-1.7B — State-of-the-art Spracherkennung via vLLM mit vollständig OpenAI-kompatiblen Endpunkt für eine vollständig lokale Voice Pipeline auf Olares One.
 
