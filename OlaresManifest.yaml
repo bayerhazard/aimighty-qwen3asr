@@ -8,10 +8,10 @@ workloadReplicas:
 metadata:
   name: aimqwen3asr
   icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
-  description: Qwen3-ASR-1.7B via vLLM — OpenAI-compatible /v1/audio/transcriptions, 30 languages + 22 Chinese dialects
+  description: Qwen3-ASR-1.7B via vLLM - OpenAI-kompatibel
   appid: aimqwen3asr
   title: AIM Qwen3 ASR 1.7B
-  version: '1.0.3'
+  version: '1.1.0'
   categories:
     - Audio
 
@@ -25,40 +25,24 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '1.0.3'
+  versionName: '1.1.0'
   fullDescription: |
-    **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a full OpenAI-compatible transcription API.
+    Qwen3-ASR-1.7B — State-of-the-art Spracherkennung via vLLM mit vollständig OpenAI-kompatiblen Endpunkt für eine vollständig lokale Voice Pipeline auf Olares One.
 
-    **Model**
-    Qwen/Qwen3-ASR-1.7B (Apache-2.0, commercial use allowed). SOTA among open-source ASR models, competitive with the strongest commercial APIs. Supports language identification and speech recognition for 30 languages and 22 Chinese dialects (incl. German).
+    Key Features:
+    - ASR (Automatic Speech Recognition) / STT (Speech to Text)
+    - Spracherkennung: Automatische Identifikation der gesprochene Sprache
+    - Sprachunterstützung: 30 Sprachen, inklusive Deutsch und Englisch
+    - Robust bei Nebengeräuschen, Akzenten und schwierigen Textstrukturen
+    - Dashboard für einfaches Testen
+    - Open-Source unter der Apache 2.0 Lizenz
 
-    **Inference Engine**
-    vLLM (official `qwenllm/qwen3-asr` image, CUDA 12.8). Native OpenAI-compatible /v1/audio/transcriptions + /v1/chat/completions (audio_url).
-
-    **Key Features**
-    - OpenAI-compatible API: /v1/audio/transcriptions, /v1/models
-    - Automatic language detection (or force e.g. "German")
-    - Robust under noise, accents and challenging text patterns
-    - Streaming and long-audio transcription supported by the engine
-    - Web dashboard for quick testing (upload audio → transcript)
-
-    **API Example**
-    ```bash
-    curl -X POST http://localhost:8000/v1/audio/transcriptions \
-      -H "Content-Type: multipart/form-data" \
-      -F "file=@audio.wav" -F "model=qwen3-asr-1.7b" -F "language=German"
-    # {"text":"..."}
-    ```
-
-    **Resource Usage**
-    GPU: 1× NVIDIA (~6-8 GB VRAM via GPU memory slice, co-resident with other apps)
-    RAM: 8 GB, CPU: 2 cores
-    Disk: 20 GB (model cache, HF_HOME)
+    Endpunkte:
+    - /v1/audio/transcriptions (Transkription von Audiodateien in Text)
+    - /v1/models (Abfrage verfügbarer Modelle)
+    - /v1/chat/completions (Chat-Kompletionen mit Audio-URLs als Input)
   upgradeDescription: |
-    v1.0.3: Co-residency (Variante B) — Slice 8 -> 6 GiB (6144m), gpu_memory_utilization 0.9 -> 0.95, --max-model-len 20480 -> 4096 (~5 min audio, KV ~0.6 GiB). Frees the worker GPU so voxtral (13 GiB) + reranker (3 GiB) co-reside (22 of 23.88 GiB). Voice commands (seconds) unaffected.
-    v1.0.2: KV fit + clean output — gpu_memory_utilization 0.3 -> 0.9 (HAMi reports total=8 GiB; 0.3x8=2.4 GiB budget < 3.86 GiB model -> no KV cache) and --max-model-len 20480 (default 65536 needs 7 GiB KV, only 2.24 GiB available). Added transcribe-parse sidecar: Qwen3-ASR emits 'language X<asr_text>...' via the vLLM transcription route; the proxy strips the metadata so /v1/audio/transcriptions returns pure text.
-    v1.0.1: HAMi fix — set CUDA_DEVICE_MEMORY_LIMIT_0=8192m (the GPU binding injected memory=0 on the shared worker GPU, blocking all cudaMalloc; engine crashed at boot). Caps the app at 8 GiB so it co-resides with Voxtral TTS (14 GiB) on the 24 GB worker GPU.
-    v1.0.0: Initial release — Qwen3-ASR-1.7B via official qwenllm/qwen3-asr image (digest-pinned), qwen-asr-serve, OpenAI-compatible transcription API, web dashboard.
+    1.1.0: Initial Release für Olares One
   developer: Aimighty
   website: https://github.com/bayerhazard/aimighty-qwen3asr
   sourceCode: https://github.com/bayerhazard/aimighty-qwen3asr
