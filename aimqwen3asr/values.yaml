@@ -49,6 +49,7 @@ env:
   CUDA_DEVICE_MEMORY_LIMIT_0: "6144m"
   GPU_MEM_UTIL: "0.95"
   MAX_NUM_SEQS: "4"
+  VLLM_MAX_AUDIO_CLIP_FILESIZE_MB: "100"
 
 # Olares-injected environment variables (from OlaresManifest envs:).
 # Default present so standalone `helm template` renders without nil pointer;

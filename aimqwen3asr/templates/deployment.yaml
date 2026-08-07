@@ -770,6 +770,8 @@ spec:
             value: {{ .Values.env.GPU_MEM_UTIL | quote }}
           - name: MAX_NUM_SEQS
             value: {{ .Values.env.MAX_NUM_SEQS | quote }}
+          - name: VLLM_MAX_AUDIO_CLIP_FILESIZE_MB
+            value: {{ .Values.env.VLLM_MAX_AUDIO_CLIP_FILESIZE_MB | quote }}
           - name: PYTORCH_CUDA_ALLOC_CONF
             value: "expandable_segments:True"
           - name: GPU_TYPE
