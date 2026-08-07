@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.08.1'
+  version: '26.08.2'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '26.08.1'
+  versionName: '26.08.2'
   fullDescription: |
     **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
 
@@ -49,6 +49,7 @@ spec:
     RAM: 8 GB, CPU: 2 cores
     Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
+    v26.08.2: VRAM allocation v2 — CUDA_DEVICE_MEMORY_LIMIT_0 6144m->5632m (gemessener Peak 5488 MiB, 144 MiB Headroom). Sparrt 0.5 GiB fürs Co-Residency-Budget (TTS 13.4 + ASR 5.5 + Reranker 3.0 = 22.4 of 24.4 GiB). Built for Olares 1.12.6.
     v26.08.1: Unified naming — title "AIM Qwen3 1.7B ASR", English descriptions. Built for Olares 1.12.6.
     1.2.1: Sprachauswahl sendet ISO-Codes (de/en/fr) — Fix für vLLM-Sprachvalidierung
     1.2.0: Dashboard im Rewind-Design mit Direktaufnahme (Mikrofon), Sprachumschalter DE/EN und dezenter Konfig-Anzeige

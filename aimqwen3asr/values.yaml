@@ -46,7 +46,7 @@ env:
   MODEL_NAME: Qwen/Qwen3-ASR-1.7B
   MODEL_ALIAS: qwen3-asr-1.7b
   HF_HOME: /models/huggingface
-  CUDA_DEVICE_MEMORY_LIMIT_0: "6144m"
+  CUDA_DEVICE_MEMORY_LIMIT_0: "5632m"
   GPU_MEM_UTIL: "0.95"
   MAX_NUM_SEQS: "4"
 

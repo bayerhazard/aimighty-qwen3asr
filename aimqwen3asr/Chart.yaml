@@ -2,8 +2,8 @@ apiVersion: v2
 name: aimqwen3asr
 description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
 type: application
-version: 26.08.1
-appVersion: "26.08.1"
+version: 26.08.2
+appVersion: "26.08.2"
 keywords:
   - ai
   - asr
