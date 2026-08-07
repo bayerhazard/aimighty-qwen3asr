@@ -69,78 +69,266 @@ data:
     }
   index.html: |
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="de">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Qwen3-ASR</title>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: #0f0f0f; color: #e0e0e0; min-height: 100vh;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .container { width: 100%; max-width: 720px; padding: 2rem; }
-        h1 {
-          font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;
-          background: linear-gradient(135deg, #64748b, #3b82f6);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
-        .dropzone {
-          width: 100%; padding: 2rem 1rem; border-radius: 12px;
-          border: 1.5px dashed #3a3a3a; background: #141414;
-          text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
-          font-size: 0.9rem; color: #aaa;
-        }
-        .dropzone:hover, .dropzone.dragover { border-color: #3b82f6; background: #161b26; }
-        .dropzone .filename { color: #e0e0e0; font-weight: 500; }
-        .controls { display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; }
-        select {
-          flex: 1; padding: 0.6rem 0.75rem; border-radius: 8px;
-          border: 1px solid #333; background: #1a1a1a; color: #e0e0e0;
-          font-size: 0.9rem; outline: none; cursor: pointer;
-        }
-        select:focus { border-color: #3b82f6; }
-        button {
-          padding: 0.6rem 1.5rem; border-radius: 8px; border: none;
-          background: linear-gradient(135deg, #64748b, #3b82f6);
-          color: #fff; font-size: 0.9rem; font-weight: 500;
-          cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
-        }
-        button:hover { opacity: 0.9; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status { margin-top: 1rem; font-size: 0.85rem; color: #888; min-height: 1.5rem; }
-        .status.error { color: #ef4444; }
-        .status.success { color: #22c55e; }
-        .transcript {
-          margin-top: 1rem; padding: 1rem; border-radius: 10px;
-          background: #1a1a1a; border: 1px solid #333; min-height: 120px;
-          white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; display: none;
-        }
-        .transcript .label { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-        .health {
-          margin-top: 2rem; padding: 0.75rem; border-radius: 8px;
-          background: #1a1a1a; border: 1px solid #333; font-size: 0.8rem; color: #888;
-        }
-        .health span { color: #22c55e; }
-        .hint { color: #666; font-size: 0.78rem; margin-top: 0.4rem; }
-      </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIM Qwen3 ASR — Dashboard</title>
+    <style>
+    /* ============================================================
+       AIM Qwen3-ASR Dashboard
+       Design-Sprache: Rewind (Hanseatenblau + Gold-Akzent)
+       ============================================================ */
+    :root{
+      /* Surface-Scale (Navy) */
+      --b-25:#000714; --b-50:#010e1d; --b-100:#041120; --b-150:#081a2e;
+      --b-200:#10243c; --b-300:#1d3a5c; --b-400:#2f5178;
+      --b-500:#4a6c95; --b-600:#708bab; --b-700:#9bafc6;
+      --b-800:#c6d2e0; --b-900:#e6ebf1;
+    
+      /* Signal — ein Akzent (AImighty-Gold) */
+      --gold:#c9a45c; --gold-hell:#d5b371; --gold-tief:#b28b42;
+      --marke:var(--gold); --marke-hell:var(--gold-hell); --marke-tief:var(--gold-tief);
+      --auf-marke:var(--b-25);
+    
+      --bg:var(--b-50);
+      --surface:var(--b-100);
+      --surface2:var(--b-150);
+      --border:var(--b-300);
+      --border-soft:var(--b-200);
+      --text:var(--b-800);
+      --text-stark:#fff;
+      --text-dim:var(--b-500);
+      --accent:var(--marke);
+      --accent-hover:var(--marke-hell);
+    
+      --success:#4ade80; --success-bg:color-mix(in oklab, #4ade80 12%, transparent);
+      --warning:#fbbf24; --warning-bg:color-mix(in oklab, #fbbf24 12%, transparent);
+      --error:#f87171;  --error-bg:color-mix(in oklab, #f87171 12%, transparent);
+      --info-bg:color-mix(in oklab, var(--marke) 12%, transparent);
+    
+      --marke-flaeche:color-mix(in oklab, var(--marke) 12%, transparent);
+      --marke-rand:color-mix(in oklab, var(--marke) 44%, transparent);
+    
+      --fokus:var(--marke-hell);
+    
+      --schrift:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      --mono:ui-monospace,'SF Mono','Fira Code',Menlo,Consolas,monospace;
+    
+      --radius:8px;
+      --seite:clamp(1rem, 3.5vw, 2.5rem);
+      --inhalt:60rem;
+    }
+    
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    
+    body{
+      font-family:var(--schrift);
+      background:
+        radial-gradient(1200px 600px at 80% -10%, color-mix(in oklab, var(--marke) 9%, transparent), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, color-mix(in oklab, var(--marke) 5%, transparent), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    
+    :focus-visible{outline:2px solid var(--fokus);outline-offset:2px;border-radius:4px}
+    
+    .container{width:min(100% - var(--seite)*2, var(--inhalt));margin-inline:auto;padding-block:24px}
+    
+    /* Mikro-Label (Kicker-Pattern) */
+    .kicker{
+      display:inline-flex;align-items:center;gap:.55rem;
+      font-family:var(--mono);font-size:.68rem;font-weight:600;
+      letter-spacing:.18em;text-transform:uppercase;
+      color:var(--marke);margin-bottom:1.1rem;
+    }
+    .kicker::before{content:"";inline-size:1.4rem;block-size:1px;background:var(--marke-rand);display:block}
+    
+    /* Kopfzeile */
+    .header{
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;
+      margin-bottom:1.75rem;padding-block:.25rem 1rem;
+      border-bottom:1px solid var(--border-soft);
+    }
+    .header h1{
+      font-size:clamp(1.4rem, 1.1rem + 1vw, 1.7rem);
+      font-weight:700;letter-spacing:-.02em;color:var(--text-stark);line-height:1.1;
+    }
+    .header h1::first-letter{color:var(--marke)}
+    .header .subtitle{font-size:.82rem;color:var(--text-dim);margin-top:.15rem}
+    
+    /* Sprachumschalter */
+    .lang-toggle{
+      display:inline-flex;gap:2px;background:var(--surface);border:1px solid var(--border-soft);
+      border-radius:6px;padding:2px;flex-shrink:0;
+    }
+    .lang-toggle button{
+      border:none;background:transparent;color:var(--text-dim);
+      font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.1em;
+      padding:.3rem .6rem;border-radius:4px;cursor:pointer;transition:all .16s ease;
+    }
+    .lang-toggle button:hover{color:var(--text-stark)}
+    .lang-toggle button.active{background:var(--marke);color:var(--auf-marke)}
+    
+    /* Karten */
+    .card{
+      background:linear-gradient(180deg, var(--surface), var(--b-100));
+      border:1px solid var(--border-soft);
+      border-radius:var(--radius);
+      padding:1.1rem 1.2rem;
+      margin-bottom:16px;
+    }
+    .card-title{
+      font-size:.95rem;font-weight:600;color:var(--text-stark);
+      margin-bottom:14px;display:flex;align-items:center;gap:8px;
+    }
+    .card-title .icon{font-size:1.05rem;color:var(--marke)}
+    
+    /* Dropzone */
+    .dropzone{
+      width:100%;padding:1.6rem 1rem;border-radius:var(--radius);
+      border:1.5px dashed var(--border);background:var(--surface2);
+      text-align:center;cursor:pointer;transition:border-color .18s ease,background .18s ease;
+      font-size:.9rem;color:var(--text-dim);
+    }
+    .dropzone:hover,.dropzone.dragover{border-color:var(--marke);background:color-mix(in oklab, var(--marke) 6%, var(--surface2))}
+    .dropzone .filename{color:var(--text-stark);font-weight:600}
+    
+    /* Controls */
+    .controls{display:flex;gap:.75rem;margin-top:1rem;align-items:center}
+    select{
+      flex:1;padding:.55rem .7rem;border-radius:6px;
+      border:1px solid var(--border);background:var(--surface2);color:var(--text);
+      font-size:.9rem;outline:none;cursor:pointer;font-family:var(--schrift);
+    }
+    select:focus{border-color:var(--marke)}
+    select option{background:var(--surface)}
+    
+    /* Buttons */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+      block-size:2.5rem;padding-inline:1.1rem;
+      border:1px solid var(--border);border-radius:6px;
+      background:var(--surface2);color:var(--text);
+      font-family:var(--schrift);font-size:.85rem;font-weight:600;line-height:1;
+      white-space:nowrap;cursor:pointer;user-select:none;
+      transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+    }
+    .btn:hover{border-color:var(--marke-rand);background:var(--marke-flaeche);color:var(--text-stark)}
+    .btn.primary{background:var(--marke);border-color:var(--marke);color:var(--auf-marke)}
+    .btn.primary:hover{background:var(--marke-hell);border-color:var(--marke-hell)}
+    .btn.danger{background:var(--error-bg);border-color:color-mix(in oklab, var(--error) 55%, transparent);color:var(--error)}
+    .btn.danger:hover{background:color-mix(in oklab, var(--error) 22%, transparent);border-color:var(--error)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    
+    /* Aufnahme-Timer */
+    .rec-timer{
+      font-family:var(--mono);font-size:.85rem;color:var(--text-dim);
+      font-variant-numeric:tabular-nums;letter-spacing:.05em;
+    }
+    .rec-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--error);margin-right:7px;vertical-align:baseline}
+    .rec-dot.pulse{animation:pulse 1.2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+    
+    /* Status */
+    .status{margin-top:1rem;font-size:.85rem;color:var(--text-dim);min-height:1.5rem;display:flex;align-items:center;gap:8px}
+    .status.error{color:var(--error)}
+    .status.success{color:var(--success)}
+    .spinner{
+      display:inline-block;width:14px;height:14px;
+      border:2px solid var(--border);border-top-color:var(--marke);
+      border-radius:50%;animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* Transkript */
+    .transcript{
+      margin-top:1rem;padding:1rem;border-radius:var(--radius);
+      background:var(--b-25);border:1px solid var(--border-soft);min-height:120px;
+      white-space:pre-wrap;line-height:1.7;font-size:.95rem;display:none;
+    }
+    .transcript .label{
+      color:var(--text-dim);font-size:.68rem;text-transform:uppercase;
+      letter-spacing:.14em;font-family:var(--mono);font-weight:600;margin-bottom:.6rem;
+    }
+    
+    /* Health + Footer */
+    .foot{
+      margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border-soft);
+      display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+      font-size:.74rem;color:var(--text-dim);font-family:var(--mono);
+    }
+    .foot .health{display:inline-flex;align-items:center;gap:6px}
+    .foot .health .ok{color:var(--success)}
+    .foot .health .bad{color:var(--error)}
+    .foot .cfg{display:flex;gap:14px;flex-wrap:wrap}
+    .foot .cfg span{white-space:nowrap}
+    .foot .cfg b{color:var(--text);font-weight:600}
+    
+    @media (max-width:600px){
+      .header{flex-direction:column;gap:12px;align-items:flex-start}
+      .controls{flex-wrap:wrap}
+      .controls select{flex:none;width:100%}
+      .btn-group{width:100%}
+      .btn{flex:1}
+    }
+    
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-dim)}
+    
+    .hidden{display:none !important}
+    
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none !important;transition:none !important}
+    }
+    </style>
     </head>
     <body>
-      <div class="container">
-        <h1>Qwen3-ASR 1.7B</h1>
-        <p class="subtitle">Alibaba Qwen3-ASR via vLLM — 30 languages, automatic detection, robust to noise</p>
-
+    <div class="container">
+    
+      <div class="header">
+        <div>
+          <h1>Qwen3-ASR 1.7B</h1>
+          <div class="subtitle">Qwen3-ASR via vLLM — 30 Sprachen, automatische Erkennung, robust bei Störgeräuschen</div>
+        </div>
+        <div class="lang-toggle" role="group" aria-label="Sprache">
+          <button type="button" id="langDE" class="active">DE</button>
+          <button type="button" id="langEN">EN</button>
+        </div>
+      </div>
+    
+      <span class="kicker" data-i18n="kicker">Spracherkennung</span>
+    
+      <!-- Karte 1: Aufnahme -->
+      <div class="card">
+        <div class="card-title"><span class="icon">●</span><span data-i18n="recTitle">Direktaufnahme</span></div>
+        <div class="btn-group">
+          <button class="btn primary" id="recBtn" data-i18n="recBtn">Aufnahme starten</button>
+          <button class="btn danger hidden" id="stopBtn" data-i18n="stopBtn">Aufnahme stoppen</button>
+          <span class="rec-timer hidden" id="recTimer"><span class="rec-dot pulse"></span>0:00</span>
+        </div>
+        <div class="hint" data-i18n="recHint" style="color:var(--text-dim);font-size:.78rem;margin-top:.5rem">Sprachaufnahme über das Mikrofon — wird direkt transkribiert (WAV, mono).</div>
+      </div>
+    
+      <!-- Karte 2: Upload -->
+      <div class="card">
+        <div class="card-title"><span class="icon">▲</span><span data-i18n="upTitle">Audiodatei hochladen</span></div>
         <div class="dropzone" id="dropzone">
-          <div id="dzText">Click or drop an audio file (wav / mp3 / m4a / flac / ogg)</div>
+          <div id="dzText" data-i18n="dzText">Klicken oder Audiodatei hierher ziehen (wav / mp3 / m4a / flac / ogg)</div>
           <input type="file" id="fileInput" accept="audio/*" hidden>
         </div>
-
         <div class="controls">
-          <select id="langSelect">
-            <option value="">Auto-detect</option>
+          <select id="langSelect" aria-label="Sprache">
+            <option value="" data-i18n="langAuto">Auto-Erkennung</option>
             <option value="German">Deutsch</option>
             <option value="English">English</option>
             <option value="French">Français</option>
@@ -155,87 +343,283 @@ data:
             <option value="Japanese">日本語</option>
             <option value="Korean">한국어</option>
           </select>
-          <button id="transcribeBtn" onclick="transcribe()" disabled>Transcribe</button>
+          <button class="btn" id="transcribeBtn" disabled data-i18n="transcribeBtn">Transkribieren</button>
         </div>
-        <div class="hint">Language hint is optional — Qwen3-ASR auto-detects.</div>
-
-        <div class="status" id="status"></div>
-        <div class="transcript" id="transcript">
-          <div class="label">Transcript</div>
-          <div id="transcriptText"></div>
-        </div>
-
-        <div class="health" id="healthInfo">Checking health...</div>
+        <div style="color:var(--text-dim);font-size:.78rem;margin-top:.4rem" data-i18n="langHint">Sprachhinweis optional — Qwen3-ASR erkennt die Sprache automatisch.</div>
       </div>
-      <script>
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('fileInput');
-        const statusEl = document.getElementById('status');
-        const transcriptEl = document.getElementById('transcript');
-        const transcriptText = document.getElementById('transcriptText');
-        const btn = document.getElementById('transcribeBtn');
-        let selectedFile = null;
-
-        async function checkHealth() {
-          try {
-            const res = await fetch('/health');
-            await res.json();
-            document.getElementById('healthInfo').innerHTML = 'Status: <span>OK</span>';
-          } catch (e) {
-            document.getElementById('healthInfo').innerHTML = 'Status: <span style="color:#ef4444">UNREACHABLE</span>';
-          }
+    
+      <div class="status" id="status"></div>
+      <div class="transcript" id="transcript">
+        <div class="label" data-i18n="transcriptLabel">Transkript</div>
+        <div id="transcriptText"></div>
+      </div>
+    
+      <div class="foot">
+        <div class="health" id="healthInfo"><span data-i18n="healthChecking">Status wird geprüft…</span></div>
+        <div class="cfg">
+          <span><b data-i18n="cfgModel">Modell</b>: qwen3-asr-1.7b</span>
+          <span><b data-i18n="cfgApi">API</b>: <span id="apiUrl">/v1/audio/transcriptions</span></span>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+    /* ===== i18n DE/EN ===== */
+    const I18N = {
+      de: {
+        kicker: 'Spracherkennung',
+        recTitle: 'Direktaufnahme',
+        recBtn: 'Aufnahme starten',
+        stopBtn: 'Aufnahme stoppen',
+        recHint: 'Sprachaufnahme über das Mikrofon — wird direkt transkribiert (WAV, mono).',
+        upTitle: 'Audiodatei hochladen',
+        dzText: 'Klicken oder Audiodatei hierher ziehen (wav / mp3 / m4a / flac / ogg)',
+        langAuto: 'Auto-Erkennung',
+        transcribeBtn: 'Transkribieren',
+        langHint: 'Sprachhinweis optional — Qwen3-ASR erkennt die Sprache automatisch.',
+        transcriptLabel: 'Transkript',
+        healthChecking: 'Status wird geprüft…',
+        healthOk: 'Bereit',
+        healthBad: 'Nicht erreichbar',
+        cfgModel: 'Modell',
+        cfgApi: 'API',
+        recording: 'Aufnahme läuft…',
+        transcribing: 'Wird transkribiert…',
+        done: 'Fertig',
+        emptyTranscript: '(leeres Transkript)',
+        errNoFile: 'Bitte zuerst eine Datei auswählen.',
+        errMic: 'Mikrofon-Zugriff verweigert oder nicht verfügbar.',
+        errStop: 'Keine aktive Aufnahme.',
+        recordingTooltip: 'Aufnahme beenden',
+      },
+      en: {
+        kicker: 'Speech Recognition',
+        recTitle: 'Direct recording',
+        recBtn: 'Start recording',
+        stopBtn: 'Stop recording',
+        recHint: 'Record via microphone — transcribed directly (WAV, mono).',
+        upTitle: 'Upload audio file',
+        dzText: 'Click or drop an audio file here (wav / mp3 / m4a / flac / ogg)',
+        langAuto: 'Auto-detect',
+        transcribeBtn: 'Transcribe',
+        langHint: 'Language hint is optional — Qwen3-ASR auto-detects.',
+        transcriptLabel: 'Transcript',
+        healthChecking: 'Checking status…',
+        healthOk: 'Ready',
+        healthBad: 'Unreachable',
+        cfgModel: 'Model',
+        cfgApi: 'API',
+        recording: 'Recording…',
+        transcribing: 'Transcribing…',
+        done: 'Done',
+        emptyTranscript: '(empty transcript)',
+        errNoFile: 'Please select a file first.',
+        errMic: 'Microphone access denied or unavailable.',
+        errStop: 'No active recording.',
+        recordingTooltip: 'Stop recording',
+      }
+    };
+    
+    let LANG = 'de';
+    
+    function applyLang() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[LANG][key]) el.textContent = I18N[LANG][key];
+      });
+      document.getElementById('langDE').classList.toggle('active', LANG === 'de');
+      document.getElementById('langEN').classList.toggle('active', LANG === 'en');
+      document.documentElement.lang = LANG === 'de' ? 'de' : 'en';
+    }
+    document.getElementById('langDE').addEventListener('click', () => { LANG = 'de'; applyLang(); });
+    document.getElementById('langEN').addEventListener('click', () => { LANG = 'en'; applyLang(); });
+    applyLang();
+    
+    /* ===== API-Basis ===== */
+    const API_URL = window.location.origin + '/v1/audio/transcriptions';
+    document.getElementById('apiUrl').textContent = API_URL;
+    
+    /* ===== Elemente ===== */
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const statusEl = document.getElementById('status');
+    const transcriptEl = document.getElementById('transcript');
+    const transcriptText = document.getElementById('transcriptText');
+    const btn = document.getElementById('transcribeBtn');
+    const recBtn = document.getElementById('recBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const recTimer = document.getElementById('recTimer');
+    let selectedFile = null;
+    
+    function setStatus(cls, msg) {
+      statusEl.className = 'status' + (cls ? ' ' + cls : '');
+      statusEl.textContent = msg;
+    }
+    function setLoading(msg) {
+      statusEl.className = 'status';
+      statusEl.innerHTML = '<span class="spinner"></span>' + msg;
+    }
+    
+    /* ===== Health ===== */
+    async function checkHealth() {
+      try {
+        const res = await fetch('/health');
+        await res.json();
+        document.getElementById('healthInfo').innerHTML =
+          '<span class="ok">●</span> <span>' + I18N[LANG].healthOk + '</span>';
+      } catch (e) {
+        document.getElementById('healthInfo').innerHTML =
+          '<span class="bad">●</span> <span>' + I18N[LANG].healthBad + '</span>';
+      }
+    }
+    
+    /* ===== Upload ===== */
+    function setFile(file) {
+      if (!file) return;
+      selectedFile = file;
+      document.getElementById('dzText').innerHTML =
+        '<span class="filename">' + file.name + '</span> — ' + (file.size / 1024).toFixed(0) + ' KB';
+      btn.disabled = false;
+    }
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); setFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+    
+    /* ===== WAV-Aufnahme (PCM → WAV, garantiert backend-kompatibel) ===== */
+    let mediaRecorder = null;   // nutzt Web Audio API statt MediaRecorder für WAV
+    let audioCtx = null;
+    let stream = null;
+    let chunks = [];
+    let recorderStart = 0;
+    let timerInterval = null;
+    
+    function formatTime(ms) {
+      const s = Math.floor(ms / 1000);
+      return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+    
+    function encodeWAV(samples, sampleRate) {
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+      const writeStr = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+    
+    async function startRecording() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
+        setStatus('error', I18N[LANG].errMic);
+        return;
+      }
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+      chunks = [];
+      processor.onaudioprocess = (e) => { chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+      source.connect(processor);
+      processor.connect(audioCtx.destination);
+      mediaRecorder = { source, processor, stop: () => { processor.disconnect(); source.disconnect(); } };
+    
+      recorderStart = Date.now();
+      recBtn.classList.add('hidden');
+      stopBtn.classList.remove('hidden');
+      recTimer.classList.remove('hidden');
+      setStatus('', I18N[LANG].recording);
+      timerInterval = setInterval(() => {
+        recTimer.innerHTML = '<span class="rec-dot pulse"></span>' + formatTime(Date.now() - recorderStart);
+      }, 250);
+    }
+    
+    async function stopRecording() {
+      if (!mediaRecorder) return;
+      clearInterval(timerInterval);
+      recTimer.classList.add('hidden');
+      recBtn.classList.remove('hidden');
+      stopBtn.classList.add('hidden');
+      const ctx = audioCtx;
+      const proc = mediaRecorder.processor;
+      mediaRecorder = null;
+      try { stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+      try { proc.onaudioprocess = null; } catch (e) {}
+      try { ctx.close(); } catch (e) {}
+    
+      const flat = [];
+      let total = 0;
+      for (const c of chunks) total += c.length;
+      const merged = new Float32Array(total);
+      let off = 0;
+      for (const c of chunks) { merged.set(c, off); off += c.length; }
+      const wav = encodeWAV(merged, ctx.sampleRate);
+      if (wav.size < 100) { setStatus('error', I18N[LANG].errStop); return; }
+      chunks = [];
+      await sendAudio(wav, 'recording.wav');
+    }
+    
+    recBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+    
+    /* ===== Transkription (Upload + Aufnahme gemeinsam) ===== */
+    async function sendAudio(blob, filename) {
+      const form = new FormData();
+      form.append('file', blob, filename);
+      form.append('model', 'qwen3-asr-1.7b');
+      const lang = document.getElementById('langSelect').value;
+      if (lang) form.append('language', lang);
+    
+      btn.disabled = true;
+      setLoading(I18N[LANG].transcribing);
+      transcriptEl.style.display = 'none';
+    
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: form });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || err.message || ('HTTP ' + res.status));
         }
-
-        function setFile(file) {
-          if (!file) return;
-          selectedFile = file;
-          document.getElementById('dzText').innerHTML = '<span class="filename">' + file.name + '</span> — ' + (file.size / 1024).toFixed(0) + ' KB';
-          btn.disabled = false;
-        }
-
-        dropzone.addEventListener('click', () => fileInput.click());
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); setFile(e.dataTransfer.files[0]); });
-        fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
-
-        async function transcribe() {
-          if (!selectedFile) return;
-          const form = new FormData();
-          form.append('file', selectedFile);
-          form.append('model', 'qwen3-asr-1.7b');
-          const lang = document.getElementById('langSelect').value;
-          if (lang) form.append('language', lang);
-
-          btn.disabled = true;
-          statusEl.className = 'status';
-          statusEl.textContent = 'Transcribing...';
-          transcriptEl.style.display = 'none';
-
-          try {
-            const res = await fetch('/v1/audio/transcriptions', { method: 'POST', body: form });
-            if (!res.ok) {
-              const err = await res.json().catch(() => ({}));
-              throw new Error(err.detail || err.message || ('HTTP ' + res.status));
-            }
-            const data = await res.json();
-            transcriptText.textContent = data.text || '(empty transcript)';
-            transcriptEl.style.display = 'block';
-            statusEl.className = 'status success';
-            statusEl.textContent = 'Done';
-          } catch (e) {
-            statusEl.className = 'status error';
-            statusEl.textContent = 'Error: ' + e.message;
-          } finally {
-            btn.disabled = false;
-          }
-        }
-
-        checkHealth();
-        setInterval(checkHealth, 30000);
-      </script>
+        const data = await res.json();
+        transcriptText.textContent = data.text || I18N[LANG].emptyTranscript;
+        transcriptEl.style.display = 'block';
+        setStatus('success', I18N[LANG].done);
+      } catch (e) {
+        setStatus('error', 'Error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    btn.addEventListener('click', () => {
+      if (!selectedFile) { setStatus('error', I18N[LANG].errNoFile); return; }
+      sendAudio(selectedFile, selectedFile.name);
+    });
+    
+    checkHealth();
+    setInterval(checkHealth, 30000);
+    </script>
     </body>
     </html>
+
 ---
 apiVersion: v1
 kind: ConfigMap
