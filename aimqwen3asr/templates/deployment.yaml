@@ -373,7 +373,7 @@ spec:
           - "--max-num-seqs"
           - "$(MAX_NUM_SEQS)"
           - "--max-model-len"
-          - "20480"
+          - "4096"
           - "--trust-remote-code"
         env:
           - name: HF_TOKEN
