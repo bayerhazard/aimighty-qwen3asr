@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.08.2'
+  version: '26.08.3'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '26.08.2'
+  versionName: '26.08.3'
   fullDescription: |
     Qwen3-ASR-1.7B — State-of-the-art Spracherkennung via vLLM mit vollständig OpenAI-kompatiblen Endpunkt für eine vollständig lokale Voice Pipeline auf Olares One.
 
