@@ -1076,7 +1076,7 @@ spec:
       # (Qwen3-ASR emits "language <X><asr_text><text>" via the vLLM
       # transcription route; strip the metadata so clients get pure text)
       - name: transcribe-parse
-        image: "{{ .Values.transcribe.image }}"
+        image: '{{ .Values.transcribe.repository | default "ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse" }}:{{ .Values.transcribe.tag | default .Chart.AppVersion }}'
         imagePullPolicy: IfNotPresent
         command:
           - "python"

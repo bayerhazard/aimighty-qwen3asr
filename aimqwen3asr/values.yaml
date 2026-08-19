@@ -7,7 +7,8 @@ nginx:
   image: nginx:alpine
 
 transcribe:
-  image: ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse:26.09.4
+  repository: ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse
+  tag: ""
   resources:
     limits:
       cpu: 500m
