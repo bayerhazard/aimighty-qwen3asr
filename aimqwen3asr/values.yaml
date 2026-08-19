@@ -7,14 +7,15 @@ nginx:
   image: nginx:alpine
 
 transcribe:
-  image: python:3.12-alpine
+  image: ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse:26.09.4
   resources:
     limits:
       cpu: 500m
-      memory: 256Mi
+      memory: 512Mi
     requests:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
+verboseChunkSeconds: 30
 replicaCount: 1
 
 workloads:
