@@ -1,7 +1,7 @@
 image:
-  repository: qwenllm/qwen3-asr
-  tag: "latest"
-  digest: "sha256:fb75b775f089e06e5a1aaebffd421e37505cc630d50c86d889d95ffa45a7e16a"
+  repository: vllm/vllm-omni
+  tag: "v0.18.0"
+  digest: "sha256:6412a0c6cb03321761a40a65301cdcd87a4ef6bc7a75510c69b039c301cdbf8f"
   pullPolicy: IfNotPresent
 nginx:
   image: nginx:alpine
