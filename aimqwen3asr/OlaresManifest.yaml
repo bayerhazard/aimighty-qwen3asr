@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.09.6'
+  version: '26.09.7'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '26.09.6'
+  versionName: '26.09.7'
   fullDescription: |
     **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
 
@@ -49,7 +49,8 @@ spec:
     RAM: 8 GB, CPU: 2 cores
     Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
-    v26.09.6: Engine-Wechsel auf vllm-omni v0.18.0 (Audio-spezialisierter vLLM-Fork, Qwen3-ASR nativ, Audio-Deps soundfile/librosa eingebacken). vllm 0.14.0 -> 0.18.0; funktional + performancetechnisch identisch (Kurz ~143ms, Lang ~356ms, Lang-Audio OHNE OOM im 6-GiB-Slice), Transkription unverändert. Lang-Audio-Regression erst ab omni-v0.26 (daher bewusst v0.18.0). transcribe-parse-Sidecar-Tag explizit auf 26.09.5 gepinnt (AppVersion-Follow hätte :26.09.6 referenziert, das ghcr nicht hat). A/B-verifiziert 2026-08-21. Built for Olares 1.12.6.
+    v26.09.7: Rebuild von 26.09.6 — transcribe-parse-Sidecar-Tag explizit auf 26.09.5 gepinnt (AppVersion-Follow hätte :26.09.7 referenziert, das ghcr nicht hat). 26.09.6 war deploy-seitig korrupt (raw_data-Freeze, Hash hing an derselben Version); 26.09.7 erzwingt Re-Fetch. Built for Olares 1.12.6.
+    v26.09.6: Engine-Wechsel auf vllm-omni v0.18.0 (Audio-spezialisierter vLLM-Fork, Qwen3-ASR nativ, Audio-Deps soundfile/librosa eingebacken). vllm 0.14.0 -> 0.18.0; funktional + performancetechnisch identisch (Kurz ~143ms, Lang ~356ms, Lang-Audio OHNE OOM im 6-GiB-Slice), Transkription unverändert. Lang-Audio-Regression erst ab omni-v0.26 (daher bewusst v0.18.0). A/B-verifiziert 2026-08-21. Built for Olares 1.12.6.
     v26.09.5: transcribe-parse-Image-Tag folgt jetzt .Chart.AppVersion (kein Values-Freeze mehr beim market upgrade; alte eingefrorene image-Values werden ignoriert). Built for Olares 1.12.6.
     v26.09.4: verbose_json-Endpunkt via transcribe-parse-Sidecar (ffmpeg-Chunking, 1 Segment pro 30s-Chunk mit echten Timestamps) — macht Insilo/Speaker-Diarization wieder funktionsfähig; json/text/Passthrough unverändert. Built for Olares 1.12.6.
     v26.08.4: VLLM_MAX_AUDIO_CLIP_FILESIZE_MB 25->100 (max. Upload ~52 min @16kHz statt ~13 min; Audio wird in 30s-Chunks verarbeitet, Token-Limit greift nicht). Built for Olares 1.12.6.
