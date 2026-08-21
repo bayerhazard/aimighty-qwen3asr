@@ -8,7 +8,7 @@ nginx:
 
 transcribe:
   repository: ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse
-  tag: ""
+  tag: "26.09.5"
   resources:
     limits:
       cpu: 500m
