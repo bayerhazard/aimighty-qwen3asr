@@ -12,10 +12,10 @@ transcribe:
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 4Gi
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 1Gi
 verboseChunkSeconds: 30
 replicaCount: 1
 
