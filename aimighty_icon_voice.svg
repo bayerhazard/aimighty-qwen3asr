@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Voice">
+  <title>Voice</title>
+  <defs>
+    <linearGradient id="grund" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5ACA5"/><stop offset=".52" stop-color="#F39D95"/><stop offset="1" stop-color="#CA827C"/>
+    </linearGradient>
+    <linearGradient id="wappen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#415C78"/><stop offset="1" stop-color="#16293D"/>
+    </linearGradient>
+    <linearGradient id="zeichen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6B3AC"/><stop offset="1" stop-color="#D18780"/>
+    </linearGradient>
+    <linearGradient id="saum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF" stop-opacity=".40"/><stop offset=".45" stop-color="#FFF" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".12"/>
+    </linearGradient>
+    <linearGradient id="rand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF" stop-opacity=".32"/><stop offset=".5" stop-color="#FFF" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".08"/>
+    </linearGradient>
+    <filter id="weich" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="weichS" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5.56"/></filter>
+    <clipPath id="kachel"><rect width="160" height="160" rx="35.84"/></clipPath>
+    <clipPath id="wappenClip"><path transform="translate(40.32 30.40) scale(0.72145)" d="M 55 137.5 C 39.0729 133.4896 25.9245 124.3516 15.5547 110.0859 C 5.1849 95.8203 0 79.9792 0 62.5625 L 0 20.625 L 55 0 L 110 20.625 L 110 62.5625 C 110 79.9792 104.8151 95.8203 94.4453 110.0859 C 84.0755 124.3516 70.9271 133.4896 55 137.5 Z"/></clipPath>
+    <mask id="wappenMaske"><path transform="translate(40.32 30.40) scale(0.72145)" d="M 55 137.5 C 39.0729 133.4896 25.9245 124.3516 15.5547 110.0859 C 5.1849 95.8203 0 79.9792 0 62.5625 L 0 20.625 L 55 0 L 110 20.625 L 110 62.5625 C 110 79.9792 104.8151 95.8203 94.4453 110.0859 C 84.0755 124.3516 70.9271 133.4896 55 137.5 Z" fill="#FFF"/></mask>
+  </defs>
+  <g clip-path="url(#kachel)">
+    <rect width="160" height="160" fill="url(#grund)"/>
+    <ellipse cx="79.2" cy="-30.4" rx="108" ry="65.6" fill="#FFF" opacity=".15" filter="url(#weich)"/>
+    <path transform="translate(40.32 30.40) scale(0.72145)" d="M 55 137.5 C 39.0729 133.4896 25.9245 124.3516 15.5547 110.0859 C 5.1849 95.8203 0 79.9792 0 62.5625 L 0 20.625 L 55 0 L 110 20.625 L 110 62.5625 C 110 79.9792 104.8151 95.8203 94.4453 110.0859 C 84.0755 124.3516 70.9271 133.4896 55 137.5 Z" fill="url(#wappen)"/>
+    <g clip-path="url(#wappenClip)">
+      <path transform="translate(40.32 30.40) scale(0.72145)" d="M 55 137.5 C 39.0729 133.4896 25.9245 124.3516 15.5547 110.0859 C 5.1849 95.8203 0 79.9792 0 62.5625 L 0 20.625 L 55 0 L 110 20.625 L 110 62.5625 C 110 79.9792 104.8151 95.8203 94.4453 110.0859 C 84.0755 124.3516 70.9271 133.4896 55 137.5 Z" fill="none" stroke="url(#saum)" stroke-width="2.772"/>
+    </g>
+    <g mask="url(#wappenMaske)">
+      <ellipse cx="80" cy="25.44" rx="67.456" ry="38.688" fill="#FFF" opacity=".30" filter="url(#weichS)"/>
+    </g>
+  <path transform="translate(66.022 63.721)" d="M10.708 29.581 0 0H5.708L13.999 23.540L22.249 0H27.957L17.207 29.581Z" fill="url(#zeichen)"/>
+  </g>
+  <rect x="1" y="1" width="158" height="158" rx="34.84" fill="none" stroke="url(#rand)" stroke-width="2"/>
+</svg>
