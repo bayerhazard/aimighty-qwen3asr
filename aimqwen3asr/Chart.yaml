@@ -1,21 +1,22 @@
 apiVersion: v2
-name: aimqwen3asr
-description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
-type: application
-version: 26.9.9
-appVersion: "26.9.9"
-keywords:
-  - ai
-  - asr
-  - speech-to-text
-  - transcription
-  - qwen
-  - qwen3-asr
-  - alibaba
-  - vllm
+appVersion: 26.9.10
+description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible
+  API
 home: https://github.com/bayerhazard/aimighty-qwen3asr
-sources:
-  - https://github.com/bayerhazard/aimighty-qwen3asr
+keywords:
+- ai
+- asr
+- speech-to-text
+- transcription
+- qwen
+- qwen3-asr
+- alibaba
+- vllm
 maintainers:
-  - name: Aimighty
-    email: admin@aimighty.local
+- email: admin@aimighty.local
+  name: Aimighty
+name: aimqwen3asr
+sources:
+- https://github.com/bayerhazard/aimighty-qwen3asr
+type: application
+version: 26.9.10

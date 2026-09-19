@@ -11,7 +11,7 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.9.9'
+  version: '26.9.10'
   categories:
     - Audio
 
@@ -25,7 +25,7 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '26.9.9'
+  versionName: '26.9.10'
   fullDescription: |
     **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
 
@@ -45,11 +45,11 @@ spec:
     curl -X POST http://localhost:8000/v1/audio/transcriptions -H "Content-Type: multipart/form-data" -F "file=@audio.wav" -F "model=qwen3-asr-1.7b" -F "language=German"
 
     **Resource Usage**
-    GPU: 1× NVIDIA (~6-8 GB VRAM via memory slice, co-resident)
+    GPU: 1× NVIDIA (6 GiB HAMi memory slice, co-resident with the other worker-GPU apps)
     RAM: 8 GB, CPU: 2 cores
     Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
-    Initial Release for AImighty Olares One
+    v26.9.10: HAMi memory-slice pinned to 6 GiB (nvidia.com/gpumem) so the RTX 5090 on olares-worker can host OmniVoice TTS, Qwen3-ASR, PaddleOCR and the Qwen3 Reranker co-resident. Built for Olares 1.12.6.
   developer: Aimighty
   website: https://github.com/bayerhazard/aimighty-qwen3asr
   sourceCode: https://github.com/bayerhazard/aimighty-qwen3asr
