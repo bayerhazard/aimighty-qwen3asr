@@ -1027,7 +1027,7 @@ spec:
           - name: HF_HOME
             value: {{ .Values.env.HF_HOME | quote }}
           - name: CUDA_DEVICE_MEMORY_LIMIT_0
-            value: {{ .Values.env.CUDA_DEVICE_MEMORY_LIMIT_0 | quote }}
+            value: "6144m"
           - name: GPU_MEM_UTIL
             value: {{ .Values.env.GPU_MEM_UTIL | quote }}
           - name: MAX_NUM_SEQS
@@ -1045,7 +1045,16 @@ spec:
           - containerPort: {{ .Values.apiPort }}
             name: api
         resources:
-            {{- toYaml .Values.resources | nindent 10 }}
+          limits:
+            cpu: "8"
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+            nvidia.com/gpumem: "6144"
+          requests:
+            cpu: "2"
+            memory: 8Gi
+            nvidia.com/gpu: "1"
+            nvidia.com/gpumem: "6144"
         volumeMounts:
           - name: models
             mountPath: /models
