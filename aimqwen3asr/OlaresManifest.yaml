@@ -11,9 +11,18 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.9.14'
+  version: '26.10.1'
   categories:
     - Audio
+
+sharedEntrances:
+  - name: aimqwen3asr
+    host: sharedentrances-api
+    port: 0
+    title: AIM Qwen3 1.7B ASR
+    icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
+    invisible: true
+    authLevel: internal
 
 entrances:
   - name: aimqwen3asr
@@ -25,7 +34,8 @@ entrances:
     authLevel: internal
 
 spec:
-  versionName: '26.9.14'
+  onlyAdmin: true
+  versionName: '26.10.1'
   fullDescription: |
     **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
 
@@ -49,10 +59,7 @@ spec:
     RAM: 8 GB, CPU: 2 cores
     Disk: 20 GB (model cache, HF_HOME)
   upgradeDescription: |
-    v26.9.14: HAMi memory slice back to the proven 6 GiB (nvidia.com/gpumem + CUDA cap 6144m) - 5 GiB OOMs at KV-cache init (only 0.01 GiB KV free). Stability-first worker-GPU layout: ASR 6 GiB + OmniVoice 5 GiB + ComfyUI 8 GiB = 19 GiB, ~4.9 GiB headroom (the Qwen3 Reranker is stopped to guarantee margin). Built for Olares 1.12.6.
-    v26.9.12: HAMi memory slice trimmed 6 GiB -> 5 GiB (nvidia.com/gpumem + CUDA cap 5120m) so Qwen3-ASR fits on the olares-worker RTX 5090 with >=1.9 GiB free after OmniVoice TTS, the Qwen3 Reranker and ComfyUI - stability-first headroom. Built for Olares 1.12.6.
-    v26.9.11: GPU resources + CUDA cap hardcoded in the template (dodges the Olares values-freeze on upgrade) - HAMi memory slice 6 GiB.
-    v26.9.10: HAMi memory-slice pinned to 6 GiB (nvidia.com/gpumem) so the RTX 5090 on olares-worker can host OmniVoice TTS, Qwen3-ASR, PaddleOCR and the Qwen3 Reranker co-resident. Built for Olares 1.12.6.
+    v26.10.1: Initial Release for AImighty; published as a shared model app (Olares Model Console / Router), reachable by other apps via the shared entrance.
   developer: Aimighty
   website: https://github.com/bayerhazard/aimighty-qwen3asr
   sourceCode: https://github.com/bayerhazard/aimighty-qwen3asr
@@ -68,6 +75,7 @@ spec:
 
 permission:
   appData: true
+  appCommon: true
 
 envs:
   - envName: HF_TOKEN
@@ -79,6 +87,9 @@ envs:
 options:
   apiTimeout: 0
   allowMultipleInstall: false
+  LLMGatewaySupported: true
+  shared: true
+  templateOnly: false
   dependencies:
     - name: olares
       version: '>=1.12.6-0'
