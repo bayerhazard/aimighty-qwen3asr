@@ -38,7 +38,11 @@
        graph capture is where startup has been seen to wedge holding the vGPU lock. */ -}}
 {{- $engineArgs := trim ($oe.ENGINE_ARGS | default "") -}}
 {{- if eq $engineArgs "" -}}
-{{- $engineArgs = printf "--max-model-len %s --enforce-eager" (ternary "3072" "8192" (eq $gpuType "nvidia-gb10")) -}}
+{{- /* 4096 ctx + explicit util: the 1.7B encoder profiles ~3 GiB of activations under
+       --enforce-eager, so on an 8 GiB HAMi slice a 8192 ctx leaves 0 KV. The wrapper's
+       default reserve (0.85) then also under-books the slice, so pin util high (0.92,
+       just under the ~0.97 the free-memory check allows). gb10 unified memory needs less. */ -}}
+{{- $engineArgs = printf "--max-model-len %s --enforce-eager --gpu-memory-utilization %s" (ternary "3072" "4096" (eq $gpuType "nvidia-gb10")) (ternary "0.85" "0.92" (eq $gpuType "nvidia-gb10")) -}}
 {{- end -}}
 {{- $modelSan := regexReplaceAll "[^a-z0-9]+" (lower $modelName) "-" | trimAll "-" -}}
 {{- $cname := printf "audio-%s" $modelSan | trunc 63 | trimSuffix "-" -}}
