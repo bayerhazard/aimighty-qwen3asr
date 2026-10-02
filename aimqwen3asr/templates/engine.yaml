@@ -116,6 +116,12 @@ spec:
 {{- if $wantGpu }}
             - name: REQUIRED_GPU_MEMORY
               value: "{{ $gpuRaw }}"
+            # HAMi time-slicing injects CUDA_DEVICE_MEMORY_LIMIT_0=0m (whole card) when the
+            # app does not set it; vLLM then derives gpu_memory_utilization from the visible
+            # 24 GiB and starves the KV cache. Pin the cap to our HAMi slice so the engine
+            # sees exactly REQUIRED_GPU_MEMORY (8Gi/8Gi = 1.0).
+            - name: CUDA_DEVICE_MEMORY_LIMIT_0
+              value: "{{ $gpuMiB }}m"
 {{- end }}
             - name: VLLM_USE_V1
               value: "0"
