@@ -1,86 +1,10 @@
-image:
-  repository: vllm/vllm-omni
-  tag: "v0.18.0"
-  digest: "sha256:6412a0c6cb03321761a40a65301cdcd87a4ef6bc7a75510c69b039c301cdbf8f"
-  pullPolicy: IfNotPresent
-nginx:
-  image: nginx:alpine
-
-transcribe:
-  repository: ghcr.io/bayerhazard/aimqwen3asr-transcribe-parse
-  tag: "26.09.5"
-  resources:
-    limits:
-      cpu: 500m
-      memory: 4Gi
-    requests:
-      cpu: 100m
-      memory: 1Gi
-verboseChunkSeconds: 30
-replicaCount: 1
-
+# Replica count per workload; the keys must match workloadReplicas in OlaresManifest.
 workloads:
   aimqwen3asr:
     replicaCount: 1
+  llminit:
+    replicaCount: 1
 
-revisionHistoryLimit: 1
-apiPort: 8000
-dashboardPort: 8080
-transcribePort: 8010
-strategy:
-  type: Recreate
-resources:
-  limits:
-    cpu: "8"
-    memory: 16Gi
-    nvidia.com/gpu: "1"
-    nvidia.com/gpumem: "6144"
-  requests:
-    cpu: "2"
-    memory: 8Gi
-    nvidia.com/gpu: "1"
-    nvidia.com/gpumem: "6144"
-nginxResources:
-  limits:
-    cpu: 200m
-    memory: 64Mi
-  requests:
-    cpu: 50m
-    memory: 32Mi
-env:
-  MODEL_NAME: Qwen/Qwen3-ASR-1.7B
-  MODEL_ALIAS: qwen3-asr-1.7b
-  HF_HOME: /models/huggingface
-  CUDA_DEVICE_MEMORY_LIMIT_0: "6144m"
-  GPU_MEM_UTIL: "0.95"
-  MAX_NUM_SEQS: "4"
-  VLLM_MAX_AUDIO_CLIP_FILESIZE_MB: "100"
-
-# Olares-injected environment variables (from OlaresManifest envs:).
-# Default present so standalone `helm template` renders without nil pointer;
-# Olares overrides this at install time.
-olaresEnv:
-  HF_TOKEN: ""
-volumes:
-  dshm:
-    sizeLimit: 2Gi
-startupProbe:
-  httpGet:
-    path: /health
-    port: 8000
-  initialDelaySeconds: 60
-  periodSeconds: 30
-  timeoutSeconds: 5
-  failureThreshold: 720
-livenessProbe:
-  httpGet:
-    path: /health
-    port: 8000
-  initialDelaySeconds: 600
-  periodSeconds: 30
-  timeoutSeconds: 15
-  failureThreshold: 5
-userspace:
-  appData: /olares/rootfs/userspace/pvc-userspace-aimighty-m27rxxbszvgk1u2l/Data/aimqwen3asr
-service:
-  type: ClusterIP
+# Olares injects the user env map at install time; an empty default keeps
+# `helm template` / lint from failing on a nil map.
+olaresEnv: {}

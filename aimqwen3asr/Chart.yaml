@@ -1,7 +1,7 @@
 apiVersion: v2
-appVersion: 26.10.1
-description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible
-  API
+appVersion: 26.10.2
+description: Qwen3-ASR 1.7B via vLLM + Olares Model Console (llm-init) — 30 languages,
+  OpenAI-compatible transcription, Router default-stt
 home: https://github.com/bayerhazard/aimighty-qwen3asr
 keywords:
 - ai
@@ -19,4 +19,4 @@ name: aimqwen3asr
 sources:
 - https://github.com/bayerhazard/aimighty-qwen3asr
 type: application
-version: 26.10.1
+version: 26.10.2

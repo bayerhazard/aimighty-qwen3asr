@@ -1,96 +1,213 @@
-olaresManifest.version: '0.12.0'
+olaresManifest.version: "0.12.0"
 olaresManifest.type: app
 apiVersion: 'v3'
-
-workloadReplicas:
-  aimqwen3asr: 1
-
 metadata:
   name: aimqwen3asr
   icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
-  description: Qwen3-ASR 1.7B via vLLM — 30 languages, robust under noise, OpenAI-compatible API
+  description: Qwen3-ASR 1.7B via vLLM + Olares Model Console — 30 languages, noise-robust, OpenAI-compatible transcription
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.10.1'
+  version: '26.10.2'
   categories:
     - Audio
-
+  tags:
+  - speech-to-text
+  - audio
+# Internal shared API stub: in-cluster callers use http://sharedentrances-api.<ns>:80 + /v1.
 sharedEntrances:
   - name: aimqwen3asr
     host: sharedentrances-api
     port: 0
     title: AIM Qwen3 1.7B ASR
-    icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
     invisible: true
     authLevel: internal
-
+    icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
+# Entrance -> llm-init (download-svc:8090): Model Console on "/", engine /v1/* reverse-proxied; authLevel internal.
 entrances:
   - name: aimqwen3asr
-    port: 8080
-    host: aimqwen3asr
+    port: 8090
+    host: download-svc
     title: AIM Qwen3 1.7B ASR
     icon: https://raw.githubusercontent.com/bayerhazard/aimighty-qwen3asr/main/icon.png
     openMethod: window
     authLevel: internal
-
+workloadReplicas:
+  aimqwen3asr: 1
+  llminit: 1
 spec:
   onlyAdmin: true
-  versionName: '26.10.1'
+  versionName: '26.10.2'
   fullDescription: |
-    **Qwen3-ASR-1.7B** — Alibaba's state-of-the-art open automatic speech recognition model, served via vLLM with a fully OpenAI-compatible transcription API.
+    Qwen3-ASR 1.7B converts spoken audio in multiple languages into written text, served
+    through the Olares Model Console so the Router registers it under default-stt.
 
     **Model**
-    Qwen/Qwen3-ASR-1.7B (Apache-2.0, commercial use allowed). SOTA among open-source ASR models. Language identification + ASR for 30 languages and 22 Chinese dialects.
+    Qwen/Qwen3-ASR-1.7B (Apache-2.0). Language identification + ASR for 30 languages
+    and 22 Chinese dialects; robust under noise and accents.
 
     **Inference Engine**
-    vLLM (official qwenllm/qwen3-asr image, CUDA 12.8). Native OpenAI-compatible /v1/audio/transcriptions + /v1/chat/completions (audio_url).
+    Official Olares audio engine (vLLM-based) behind beclab/llm-init, which downloads the
+    weights into the shared appCommon HF cache, publishes the model card on /api/model-spec,
+    and reverse-proxies /v1/audio/transcriptions. Reachable by other apps via the shared entrance.
 
     **Key Features**
-    - OpenAI-compatible API: /v1/audio/transcriptions, /v1/models
-    - Automatic language detection (or force e.g. "German")
-    - Robust under noise, accents and challenging text patterns
-    - Web dashboard for quick testing (upload/record audio → transcript)
+    - OpenAI-compatible: /v1/audio/transcriptions, /v1/models
+    - Offline transcription and streaming recognition (stt, stt_stream)
+    - Advertised to the Router as default-stt
 
     **API Example**
-    curl -X POST http://localhost:8000/v1/audio/transcriptions -H "Content-Type: multipart/form-data" -F "file=@audio.wav" -F "model=qwen3-asr-1.7b" -F "language=German"
+    curl -X POST http://<entrance>/v1/audio/transcriptions -F "file=@audio.wav" -F "model=Qwen/Qwen3-ASR-1.7B"
 
     **Resource Usage**
-    GPU: 1× NVIDIA (6 GiB HAMi memory slice, co-resident with OmniVoice TTS and ComfyUI low-VRAM on the olares-worker RTX 5090)
-    RAM: 8 GB, CPU: 2 cores
-    Disk: 20 GB (model cache, HF_HOME)
-  upgradeDescription: |
-    v26.10.1: Initial Release for AImighty; published as a shared model app (Olares Model Console / Router), reachable by other apps via the shared entrance.
+    GPU: 1x NVIDIA (8 GiB HAMi memory slice)
+    RAM: 4-16 GB, CPU: 0.7-7 cores
+    Disk: model cache in the shared appCommon HF cache
+
   developer: Aimighty
   website: https://github.com/bayerhazard/aimighty-qwen3asr
   sourceCode: https://github.com/bayerhazard/aimighty-qwen3asr
-  requiredCpu: "2"
-  limitedCpu: "8"
-  requiredMemory: 8Gi
-  limitedMemory: 16Gi
-  requiredDisk: 20Gi
-  limitedDisk: 50Gi
-  requiredGpu: 1
+  submitter: Aimighty
+  locale:
+    - en-US
+  doc: https://huggingface.co/Qwen/Qwen3-ASR-1.7B
+  license:
+    - text: Apache-2.0
+      url: https://huggingface.co/Qwen/Qwen3-ASR-1.7B
+
+  accelerator:
+    # Sum rule: accelerator >= engine + llm-init (200m/256Mi req, 1/4Gi lim).
+    - mode: nvidia
+      limitedCpu: "7"
+      requiredCpu: "700m"
+      requiredDisk: 50Mi
+      limitedDisk: 200Gi
+      limitedMemory: "20Gi"
+      requiredMemory: "4352Mi"
+      requiredGPUMemory: "8Gi"
+      limitedGPUMemory: "8Gi"
+
   supportArch:
     - amd64
-
 permission:
   appData: true
+  appCache: true
   appCommon: true
-
-envs:
-  - envName: HF_TOKEN
-    required: false
-    applyOnChange: true
-    valueFrom:
-      envName: OLARES_USER_HUGGINGFACE_TOKEN
-
 options:
   apiTimeout: 0
-  allowMultipleInstall: false
   LLMGatewaySupported: true
   shared: true
   templateOnly: false
   dependencies:
     - name: olares
-      version: '>=1.12.6-0'
+      version: '>=1.12.7-0'
       type: system
+envs:
+  - envName: MODEL_SOURCE
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "hf://Qwen/Qwen3-ASR-1.7B"
+    description: "HuggingFace source llm-init downloads into the shared cache."
+    regex: "^hf://"
+  - envName: MODEL_NAME
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "Qwen/Qwen3-ASR-1.7B"
+    description: "Model id advertised to clients; must match the engine /v1/models id."
+  - envName: MODEL_MODE
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "audio"
+    options:
+    - title: Audio
+      value: audio
+  - envName: MODEL_SUPPORTS
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "stt,stt_stream"
+    multiSelect: true
+    splitter: ","
+    options:
+    - title: STT (offline transcription)
+      value: stt
+    - title: STT Stream (streaming ASR, WebSocket)
+      value: stt_stream
+    description: "Capabilities this app exposes."
+  - envName: REQUIRED_GPU_MEMORY
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "8Gi"
+    description: "GPU memory required for this model. `0` means CPU-only. 8Gi fits the olares-worker RTX 5090 alongside OmniVoice TTS and ComfyUI (13 GiB)."
+  - envName: CPU_REQUEST
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "500m"
+  - envName: MEMORY_REQUEST
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "4Gi"
+  - envName: CPU_LIMIT
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "6"
+  - envName: MEMORY_LIMIT
+    required: true
+    type: string
+    editable: false
+    applyOnChange: false
+    default: "16Gi"
+  - envName: LOG_LEVEL
+    required: false
+    type: string
+    editable: true
+    applyOnChange: true
+    default: "info"
+    options:
+    - title: Debug
+      value: debug
+    - title: Info
+      value: info
+    - title: Warn
+      value: warn
+    - title: Error
+      value: error
+  - envName: ENGINE_IMAGE
+    required: false
+    type: string
+    editable: true
+    applyOnChange: true
+  - envName: ENGINE_ARGS
+    required: false
+    type: string
+    editable: true
+    applyOnChange: true
+    # Left blank on purpose: the built-in depends on the card, which a static default cannot express.
+    description: "Engine-native flags (llm-init ENGINE_ARGS). Left empty, the chart uses
+      \"--max-model-len 8192 --enforce-eager\", and 3072 instead of 8192 on a gb10, whose unified
+      memory leaves a smaller KV budget after the encoder. Whatever is here REPLACES that whole
+      list, so carry the flags over when adding one."
+  - envName: HF_ENDPOINT
+    required: false
+    applyOnChange: true
+    valueFrom:
+      envName: OLARES_SYSTEM_HUGGINGFACE_SERVICE
+  - envName: HF_TOKEN
+    required: false
+    applyOnChange: true
+    valueFrom:
+      envName: OLARES_SYSTEM_HUGGINGFACE_TOKEN
