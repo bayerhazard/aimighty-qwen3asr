@@ -7,7 +7,7 @@ metadata:
   description: Qwen3-ASR 1.7B via vLLM + Olares Model Console — 30 languages, noise-robust, OpenAI-compatible transcription
   appid: aimqwen3asr
   title: AIM Qwen3 1.7B ASR
-  version: '26.10.4'
+  version: '26.10.5'
   categories:
     - Audio
   tags:
@@ -36,7 +36,7 @@ workloadReplicas:
   llminit: 1
 spec:
   onlyAdmin: true
-  versionName: '26.10.4'
+  versionName: '26.10.5'
   fullDescription: |
     Qwen3-ASR 1.7B converts spoken audio in multiple languages into written text, served
     through the Olares Model Console so the Router registers it under default-stt.
@@ -78,7 +78,7 @@ spec:
     # Sum rule: accelerator >= engine + llm-init (200m/256Mi req, 1/4Gi lim).
     - mode: nvidia
       limitedCpu: "7"
-      requiredCpu: "700m"
+      requiredCpu: "300m"
       requiredDisk: 50Mi
       limitedDisk: 200Gi
       limitedMemory: "20Gi"
